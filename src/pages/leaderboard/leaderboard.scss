@@ -1,0 +1,16 @@
+.board-container {
+  .shadow-table {
+    --tw-shadow: 0 4px 4px rgba(0, 0, 0, 0.25), inset 0 0 50px rgba(86, 204, 242, 0.25);
+    box-shadow: var(--tw-ring-offset-shadow, 0 0 transparent), var(--tw-ring-shadow, 0 0 transparent), var(--tw-shadow);
+  }
+  .leaderboard-table-header {
+    position: sticky;
+    /* top: 0px; */
+    background-color: rgba(36, 0, 81, var(--tw-bg-opacity));
+    /* --tw-bg-opacity: 0.5; */
+    padding: 0.625rem;
+    --tw-shadow: 0 4px 4px rgba(0, 0, 0, 0.25), inset 0 0 50px rgba(86, 204, 242, 0.25);
+    box-shadow: var(--tw-ring-offset-shadow, 0 0 transparent), var(--tw-ring-shadow, 0 0 transparent), var(--tw-shadow);
+    --tw-bg-opacity: 0.7;
+  }
+}
