@@ -4,12 +4,10 @@ import Navbar from './navbar';
 import Loading from "react-fullscreen-loading";
 import "./layout.scss"
 import { useAppContext } from '../contexts/AppContext';
-import  { Toaster } from 'react-hot-toast';
-import axios from 'axios';
+import { Toaster } from 'react-hot-toast';
 import { ChainID, getOnBoard, getWeb3, initNotify } from '../utils/wallet';
 import { nft_city_abi } from '../utils/abi/abi-citytoken';
 import { CONTRACT_ADDRESS_TOKEN } from '../utils/address';
-import { useNavigate } from 'react-router-dom';
 require('dotenv').config()
 
 const Layout = ({
@@ -17,7 +15,6 @@ const Layout = ({
   title = "NFT City",
 }) => {
   const context = useAppContext()
-  const navigate = useNavigate()
   const [expandSidebar, setExpandSidebar] = useState(false)
 
   // /*******************************************************
@@ -109,6 +106,7 @@ const Layout = ({
       }
     }
 
+    
     walletInitialize()
   }, [])
 
@@ -125,7 +123,7 @@ const Layout = ({
       // displayNotify("warning", "You've just changed the Ethereum network! The app will not function properly if you selected the wrong network.")
     }
   }
-  
+
   const logout = () => {
     if (context.onBoard != null) {
       context.onBoard.walletReset();
@@ -158,15 +156,15 @@ const Layout = ({
   useEffect(() => {
     const fetchUnitCost = async () => {
       // const basePrice = await context.cityContract.methods._basePrice().call()
-      const basePrice = 10000000000000000
+      const basePrice = "16000000000000000"
       context.setUnitCost(context.web3.utils.fromWei(basePrice, 'ether'))
     }
     if (context.connected && context.cityContract)
       fetchUnitCost()
-    setInterval(() => {
-      if (context.connected && context.cityContract)
-        fetchUnitCost()
-    }, 15000)
+    // setInterval(() => {
+    //   if (context.connected && context.cityContract)
+    //     fetchUnitCost()
+    // }, 15000)
   }, [context.connected, context.cityContract])
 
   return (

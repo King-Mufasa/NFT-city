@@ -82,7 +82,6 @@ export const calculatePrice = async (filter, selectPath) => {
       land: selectPath,
     }
   })
-  console.log(specPrice)
   return specPrice.data
 }
 

@@ -1,29 +1,34 @@
 import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { PrimaryButton } from "../../components/button";
 import NFTItem from "../../components/item/nft";
 import { useAppContext } from "../../contexts/AppContext";
 import Layout from "../../layout/layout";
+import { selectUtil } from "../../slice/utilitySlice";
 require('dotenv').config()
 
 const MyLandsPage = () => {
+
+  const util = useSelector(selectUtil)
+  console.log("util", util)
   const context = useAppContext()
-  const [nftUris, setNftUris] = useState([])
-  let crone
+  // const [nftUris, setNftUris] = useState([])
+  // let crone
 
-  const fetchNft = async () => {
-    if (context.cityContract && context.walletAddress) {
-      const myNftIDs = await context.cityContract.methods.tokensOfOwner(context.walletAddress).call()
-      const request = myNftIDs.map((id) => fetchNftUri(id));
-      const nftUris = await Promise.all(request)
-      setNftUris(nftUris)
-    }
-  }
+  // const fetchNft = async () => {
+  //   if (context.cityContract && context.walletAddress) {
+  //     const myNftIDs = await context.cityContract.methods.tokensOfOwner(context.walletAddress).call()
+  //     const request = myNftIDs.map((id) => fetchNftUri(id));
+  //     const nftUris = await Promise.all(request)
+  //     setNftUris(nftUris)
+  //   }
+  // }
 
-  const fetchNftUri = (id) => new Promise((resolve) => {
-    const uri = context.cityContract.methods.tokenURI(id).call().on("error", () => console.log("error")).then(res => console.log(res))
-    resolve(uri)
-  })
+  // const fetchNftUri = (id) => new Promise((resolve) => {
+  //   const uri = context.cityContract.methods.tokenURI(id).call().on("error", () => console.log("error")).then(res => console.log(res))
+  //   resolve(uri)
+  // })
 
   // useEffect(() => {
   //   if (context.connected) {
@@ -38,10 +43,43 @@ const MyLandsPage = () => {
   //   }
   // }, [context.connected])
 
+  useEffect(()=>{
+    const fetchHistory = async () =>{
+      const latest = await context.web3.eth.getBlock("latest");
+      const events = await getPastEvents(context.cityContract, 'Transfer', 1, latest.number, {to: context.walletAddress});
+      console.log(events)
+    }
+    if(context.walletAddress && context.cityContract){
+      fetchHistory()
+    }
+  },[context.cityContract, context.walletAddress])
+
   const sliceAddress = (val) => {
     return val.slice(0, 5) + '...' + val.slice(-4)
   }
 
+  async function getPastEvents(contract, event, fromBlock, toBlock, filter = {}) {
+    if (fromBlock <= toBlock) {
+        try {
+            const options = {
+                fromBlock: fromBlock,
+                toBlock  : toBlock,
+                filter,
+            };
+            const ret = await contract.getPastEvents(event, options);
+            // console.log(ret);
+            return ret;
+        }
+        catch (error) {
+            console.log(error);
+            const midBlock = (fromBlock + toBlock) >> 1;
+            const arr1 = await getPastEvents(contract, event, fromBlock, midBlock);
+            const arr2 = await getPastEvents(contract, event, midBlock + 1, toBlock);
+            return [...arr1, ...arr2];
+        }
+    }
+    return [];
+  }
 
 
   return (
@@ -167,7 +205,7 @@ const MyLandsPage = () => {
 
           </div>
         </div>
-        <div className="container flex items-center justify-center mx-auto pt-24">
+        {/* <div className="container flex items-center justify-center mx-auto pt-24">
           <div className="grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
             {
               nftUris.map((uri, idx) =>
@@ -175,7 +213,7 @@ const MyLandsPage = () => {
               )
             }
           </div>
-        </div>
+        </div> */}
       </div>
     </Layout>
   )

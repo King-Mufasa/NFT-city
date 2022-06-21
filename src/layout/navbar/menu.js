@@ -1,5 +1,5 @@
 
-import { faMap, faBookAtlas} from "@fortawesome/free-solid-svg-icons";
+import { faMap, faBookAtlas } from "@fortawesome/free-solid-svg-icons";
 export const menuList = [
   {
     id: 0,
@@ -17,7 +17,8 @@ export const menuList = [
     id: 2,
     label: "Dashboard",
     path: "/mylands",
-    icon: faBookAtlas
+    icon: faBookAtlas,
+    connect: true
   },
   // {
   //   id: 3,
