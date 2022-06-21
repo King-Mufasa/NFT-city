@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { PrimaryButton } from "../../components/button";
-import NFTItem from "../../components/item/nft";
 import { useAppContext } from "../../contexts/AppContext";
 import Layout from "../../layout/layout";
 import { selectUtil } from "../../slice/utilitySlice";
@@ -121,14 +120,14 @@ const MyLandsPage = () => {
             <p className="text-xl font-bold px-[50px]">MINTS</p>
             <div className="flex flex-1">
               <table className="w-full">
-                <thead>
+                <tr>
                   <th>
                     Date
                   </th>
                   <th>
                     Amount
                   </th>
-                </thead>
+                </tr>
                 <tbody>
                   <tr>
                     <td className="text-center">

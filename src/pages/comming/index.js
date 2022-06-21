@@ -9,36 +9,36 @@ import { useNavigate } from 'react-router-dom';
 let request
 
 const CommingSoonPage = () => {
-  const context = useAppContext()
   const navigate = useNavigate()
-
+  const context = useAppContext()
+  
   /*******************************************************
    * Check server
    *
    ******************************************************/
-  // const checkServer = () => {
-  //   request = setTimeout(() => {
-  //     axios.get(process.env.REACT_APP_SERVER_URL)
-  //       .then(res => {
-  //         context.setLoading(false)
-  //         if (res.data === "live") {
-  //           console.log("Server is Live")
-  //           clearTimeout(request)
-  //           navigate("/")
-  //         }
-  //         else {
-  //           console.log("Server is", res.data)
-  //           // checkServer()
-  //         }
-  //       })
-  //       .catch(res => {
-  //         // checkServer()
-  //       })
-  //   }, 10000)
-  // }
-
+  
   useEffect(() => {
-    // checkServer()
+    const checkServer = () => {
+      request = setTimeout(() => {
+        axios.get(process.env.REACT_APP_SERVER_URL)
+          .then(res => {
+            context.setLoading(false)
+            if (res.data === "live") {
+              console.log("Server is Live")
+              clearTimeout(request)
+              navigate("/")
+            }
+            else {
+              console.log("Server is", res.data)
+              // checkServer()
+            }
+          })
+          .catch(res => {
+            // checkServer()
+          })
+      }, 10000)
+    }
+    checkServer()
     return () => {
       clearTimeout(request)
     }

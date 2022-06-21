@@ -4,7 +4,6 @@ import mapboxgl from 'mapbox-gl';
 import * as turf from "@turf/turf";
 import { mapStype } from './mapconfig';
 import Geocoder from "react-map-gl-geocoder";
-import { useNavigate } from 'react-router-dom';
 import Map, { Source, Layer } from 'react-map-gl';
 import WertWidget from '@wert-io/widget-initializer';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -34,7 +33,6 @@ const MAXTILE = 2500;
 let toggleMultiSelect = false
 const HomePage = (props) => {
   const context = useAppContext()
-  const navigate = useNavigate()
   const [zoom, setZoom] = useState(20);
   const [expand, setExpand] = useState(true)
   const [gridData, setGridData] = useState([])
@@ -153,10 +151,9 @@ const HomePage = (props) => {
   const makeGridData = (data) => {
     let featureData = []
     const buffData = data.features[0].geometry.coordinates
-    buffData.map((item, idx) => {
-      if (idx < buffData.length)
-        featureData.push(item)
-    })
+    buffData.forEach(item => {
+      featureData.push(item)
+    });
     setGridData(featureData)
   }
 
@@ -235,15 +232,15 @@ const HomePage = (props) => {
 
 
 
-  const readyToTransact = async () => {
-    console.log(context.provider)
-    if (!context.provider) {
-      const walletSelected = await context.onBoard.walletSelect()
-      if (!walletSelected) return false
-    }
-    const ready = await context.onBoard.walletCheck()
-    return ready
-  }
+  // const readyToTransact = async () => {
+  //   console.log(context.provider)
+  //   if (!context.provider) {
+  //     const walletSelected = await context.onBoard.walletSelect()
+  //     if (!walletSelected) return false
+  //   }
+  //   const ready = await context.onBoard.walletCheck()
+  //   return ready
+  // }
 
   /**
    * Upload map image to Pinata.
@@ -316,7 +313,7 @@ const HomePage = (props) => {
     if (context.walletAddress !== undefined && context.cityContract) {
       // const specPrice = await calculatePrice(selectPath)
       // const price = await getCurrency(landPrice)
-      const maticPrice = context.web3.utils.toWei(landPrice, 'ether');
+      // const maticPrice = context.web3.utils.toWei(landPrice, 'ether');
       makePreview()
     }
   }
@@ -343,8 +340,8 @@ const HomePage = (props) => {
             'Confirming transaction'
         })
         if (context.isOwner) {
-          const hash = await context.cityContract.methods
-            .freeMintNFT(uri.uri)
+          await context.cityContract.methods
+            .giveaway(uri.uri)
             .send({ from: context.walletAddress })
             .once('sending', function (payload) {
               update({
@@ -373,9 +370,9 @@ const HomePage = (props) => {
             })
         }
         else {
-          const hash = await context.cityContract.methods
-            .mintNFT(uri.uri)
-            .send({ from: context.walletAddress, value: maticPrice })
+          await context.cityContract.methods
+            .mint(1, selectPath)
+            .send({ from: context.walletAddress, value: maticPrice})
             .once('sending', function (payload) {
               update({
                 eventCode: 'pending',

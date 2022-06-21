@@ -19,7 +19,6 @@ const AdminPage = () => {
   const [frame, setFrame] = useState(0) //0: login, 1:register, 2:reset password
   const [name, setName] = useState()
   const [password, setPassword] = useState()
-  const [error, setError] = useState()
 
 
   /**
@@ -148,7 +147,7 @@ const AdminPage = () => {
             {context.walletAddress.length > 40 ? <InputUnit type="text" disabled={true} label="Wallet address" value={context.walletAddress.substring(0, 10) + " · · · · · " + context.walletAddress.substring(40)} setValue={() => { }} validate={{ require: true }} placeholder="Wallet address" /> : <ConnectButton />}
             <PrimaryButton className="text-lg uppercase w-full mt-8" onClick={() => signUp()}>Sign Up</PrimaryButton>
           </div>}
-          {error?.error && <p className='text-red-500 font-semibold'>{error.error}</p>}
+          {/* {error?.error && <p className='text-red-500 font-semibold'>{error.error}</p>} */}
         </div>
       </div>
     </Layout>

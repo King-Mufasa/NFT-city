@@ -7,18 +7,20 @@ require('dotenv').config()
 
 const NFTItem = (props) => {
   const { className, uri } = props
-  const defaultGateway = process.env.REACT_APP_DEFAULT_GATEWAY
   const [nft, setNft] = useState()
+  const defaultGateway = process.env.REACT_APP_DEFAULT_GATEWAY
 
-  const fetchNft = () => {
-    const customUri = uri.replace("ipfs.io", defaultGateway)
-    axios.get(customUri).then(data => {
-      setNft(data.data)
-    })
-  }
+
   useEffect(() => {
-    fetchNft()
-  }, [])
+    const fetchNft = () => {
+      const customUri = uri.replace("ipfs.io", process.env.REACT_APP_DEFAULT_GATEWAY)
+      axios.get(customUri).then(data => {
+        setNft(data.data)
+      })
+    }
+    if (uri)
+      fetchNft()
+  }, [uri])
 
   return (
     <div className={`relative rounded-md ${className}`}>
