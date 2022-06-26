@@ -1,10 +1,16 @@
-import React, { useEffect } from "react";
+import axios from "axios";
+import moment from "moment";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import { Table, Column, HeaderCell, Cell } from "rsuite-table";
 import { PrimaryButton } from "../../components/button";
 import { useAppContext } from "../../contexts/AppContext";
 import Layout from "../../layout/layout";
 import { selectUtil } from "../../slice/utilitySlice";
+import { CONTRACT_ADDRESS_TOKEN } from "../../utils/address";
+import "rsuite-table/dist/css/rsuite-table.css";
+import { FullscreenLoader } from "../../components/loader";
 require('dotenv').config()
 
 const MyLandsPage = () => {
@@ -12,6 +18,8 @@ const MyLandsPage = () => {
   const util = useSelector(selectUtil)
   console.log("util", util)
   const context = useAppContext()
+  const [nftList, setNftList] = useState([])
+  const [loading, setLoading] = useState(false)
   // const [nftUris, setNftUris] = useState([])
   // let crone
 
@@ -42,55 +50,70 @@ const MyLandsPage = () => {
   //   }
   // }, [context.connected])
 
-  useEffect(()=>{
-    const fetchHistory = async () =>{
-      const latest = await context.web3.eth.getBlock("latest");
-      const events = await getPastEvents(context.cityContract, 'Transfer', 1, latest.number, {to: context.walletAddress});
-      console.log(events)
+  useEffect(() => {
+    const fetchHistory = async () => {
+      const apiKey = "DeUdi5nWBmawm7YBsvBa0-22aytCHjOk"
+      const baseURL = `https://polygon-mumbai.g.alchemy.com/v2/${apiKey}`;
+      const axiosURL = `${baseURL}`;
+
+      // Address we want get NFT mints from
+      const toAddress = context.walletAddress;
+
+      let data = JSON.stringify({
+        "jsonrpc": "2.0",
+        "id": 0,
+        "method": "alchemy_getAssetTransfers",
+        "params": [
+          {
+            "fromBlock": "0x0",
+            "fromAddress": "0x0000000000000000000000000000000000000000",
+            "toAddress": toAddress,
+            "excludeZeroValue": true,
+            "category": ["erc721", "erc1155"]
+          }
+        ]
+      });
+
+
+      var requestOptions = {
+        method: 'post',
+        headers: { 'Content-Type': 'application/json' },
+        data: data,
+      };
+      setLoading(true)
+      const res = await axios(axiosURL, requestOptions);
+      // Print contract address and tokenId for each NFT:
+      let buffer = []
+      for (const events of res.data.result.transfers) {
+        if (events.erc1155Metadata == null && events.rawContract.address === CONTRACT_ADDRESS_TOKEN) {
+          console.log("ERC-721 Token Minted: ID- ", events.tokenId, " Contract- ", events.rawContract.address);
+          buffer.push(events)
+        }
+      }
+      setNftList(buffer)
+      console.log(buffer)
+      setLoading(false)
     }
-    if(context.walletAddress && context.cityContract){
+    if (context.walletAddress) {
       fetchHistory()
     }
-  },[context.cityContract, context.walletAddress])
+  }, [context.walletAddress])
+
 
   const sliceAddress = (val) => {
     return val.slice(0, 5) + '...' + val.slice(-4)
   }
 
-  async function getPastEvents(contract, event, fromBlock, toBlock, filter = {}) {
-    if (fromBlock <= toBlock) {
-        try {
-            const options = {
-                fromBlock: fromBlock,
-                toBlock  : toBlock,
-                filter,
-            };
-            const ret = await contract.getPastEvents(event, options);
-            // console.log(ret);
-            return ret;
-        }
-        catch (error) {
-            console.log(error);
-            const midBlock = (fromBlock + toBlock) >> 1;
-            const arr1 = await getPastEvents(contract, event, fromBlock, midBlock);
-            const arr2 = await getPastEvents(contract, event, midBlock + 1, toBlock);
-            return [...arr1, ...arr2];
-        }
-    }
-    return [];
-  }
-
-
   return (
     <Layout>
-      <div className="pt-24 container mx-auto">
-        <div className="rounded-full bg-gradient-to-r from-app-primary-light to-transparent px-8 py-2 text-white font-bold">
-          <p>NFT-City</p>
-        </div>
-        <div className="flex gap-8 mt-8">
-          <div className="flex w-1/2 gap-8">
+      {loading ? <FullscreenLoader /> :
+        <div className="pt-24 container mx-auto px-4">
+          <div className="rounded-full bg-gradient-to-r from-app-primary-light to-transparent px-8 py-2 text-white font-bold ">
+            <p className="text-4xl font-semibold">NFT-City</p>
+          </div>
+          <div className="grid grid-cols-6 gap-8 mt-8 ">
 
-            <div className="text-white bg-app-primary-light rounded-xl p-6 cursor-pointer w-1/3 h-60">
+            <div className="text-white bg-app-primary-light rounded-xl p-6 cursor-pointer sm:h-72 col-span-6 sm:col-span-3 xl:col-span-1">
               <p className="text-xl font-bold">Propoties</p>
               {context.walletAddress && <div className="flex justify-between ">
                 <p className="text-app-primary-200">Address</p>
@@ -98,11 +121,11 @@ const MyLandsPage = () => {
               </div>}
             </div>
 
-            <div className="text-white bg-app-primary-light rounded-xl p-6 cursor-pointer w-2/3 h-60 flex flex-col">
+            <div className="text-white bg-app-primary-light rounded-xl p-6 cursor-pointer h-72 flex flex-col col-span-6 sm:col-span-3 xl:col-span-2">
               <p className="text-xl font-bold">Amount</p>
               <div className="flex divide-x-2 flex-1">
                 <div className="flex items-center justify-center flex-col px-8">
-                  <p className="text-5xl">4</p>
+                  <p className="text-5xl">{nftList.length}</p>
                   <p className="text-app-primary-200">NFTS</p>
                 </div>
                 <div className="flex flex-col">
@@ -115,97 +138,50 @@ const MyLandsPage = () => {
                 <PrimaryButton className="w-full">Mint More</PrimaryButton>
               </Link>
             </div>
-          </div>
-          <div className="text-white bg-app-primary-light rounded-xl p-6 cursor-pointer w-3/6 h-60 flex flex-col">
-            <p className="text-xl font-bold px-[50px]">MINTS</p>
-            <div className="flex flex-1">
-              <table className="w-full">
-                <tr>
-                  <th>
-                    Date
-                  </th>
-                  <th>
-                    Amount
-                  </th>
-                </tr>
-                <tbody>
-                  <tr>
-                    <td className="text-center">
-                      12/13/2022 12:32
-                    </td>
-                    <td className="text-center">
-                      3
-                    </td>
-                    <td>
+            <div className="text-white bg-app-primary-light rounded-xl p-6 cursor-pointer h-72 flex flex-col col-span-6 xl:col-span-3">
+              <p className="text-xl font-bold px-[50px]">NFTS</p>
+              <div className="">
+                <Table data={nftList} className="w-full text-app-primary rounded-lg">
+                  <Column width={150} resizable>
+                    <HeaderCell>Category</HeaderCell>
+                    <Cell dataKey="category" className="uppercase" />
+                  </Column>
+                  <Column width={150} resizable>
+                    <HeaderCell>Block Number</HeaderCell>
+                    <Cell dataKey="blockNum" />
+                  </Column>
+                  <Column width={80} resizable>
+                    <HeaderCell>Token ID</HeaderCell>
+                    <Cell className="flex items-center">
+                      {(rowData, rowIndex) => {
+                        console.log("KILL",rowData)
+                        return (
+                          <div
+                            key={rowIndex}
+                            className="flex items-center gap-2"
+                          >
+                            <p className="text-app-gray-900 font-medium">
+                              {parseInt(rowData.tokenId)}
+                            </p>
+                          </div>
+                        );
+                      }}
+                    </Cell>
+                  </Column>
+                  <Column width={"auto"}>
+                    <HeaderCell >Hash</HeaderCell>
+                    <Cell dataKey="hash" />
+                  </Column>
+                </Table>
+              </div>
+            </div>
 
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="text-center">
-                      12/13/2022 12:32
-                    </td>
-                    <td className="text-center">
-                      3
-                    </td>
-                    <td>
+            <div>
 
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="text-center">
-                      12/13/2022 12:32
-                    </td>
-                    <td className="text-center">
-                      3
-                    </td>
-                    <td>
-
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="text-center">
-                      12/13/2022 12:32
-                    </td>
-                    <td className="text-center">
-                      3
-                    </td>
-                    <td>
-
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="text-center">
-                      12/13/2022 12:32
-                    </td>
-                    <td className="text-center">
-                      3
-                    </td>
-                    <td>
-
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="text-center">
-                      12/13/2022 12:32
-                    </td>
-                    <td className="text-center">
-                      3
-                    </td>
-                    <td>
-
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
             </div>
           </div>
-
-          <div>
-
-          </div>
-        </div>
-        {/* <div className="container flex items-center justify-center mx-auto pt-24">
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+          {/* <div className="container flex items-center justify-center mx-auto pt-24">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {
               nftUris.map((uri, idx) =>
                 <NFTItem uri={uri} key={idx} />
@@ -213,7 +189,7 @@ const MyLandsPage = () => {
             }
           </div>
         </div> */}
-      </div>
+        </div>}
     </Layout>
   )
 }

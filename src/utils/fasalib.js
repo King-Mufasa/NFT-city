@@ -43,14 +43,14 @@ export const getTileArea = (start, end) => {
  * @returns key point of clicked tile0
  */
 export const getKeyPoint = (path) => {
-  if(path.length === 5 && path[0]!==null && path[1]!==null && path[2]!==null && path[3]!==null && path[4]!==null){
+  if (path.length === 5 && path[0] !== null && path[1] !== null && path[2] !== null && path[3] !== null && path[4] !== null) {
     const data = {
       lng: parseFloat((path[1][0] + (path[2][0] - path[1][0]) / 2).toFixed(9)),
       lat: parseFloat((path[0][1] + (path[1][1] - path[0][1]) / 2).toFixed(9))
     }
     return (data)
   }
-  else{
+  else {
     return null
   }
 }
@@ -204,11 +204,24 @@ export const checkDouplicate = (existing, selected) => {
   return buff
 }
 
+export const toUint = (tileArray) => {
+  let buffer = []
+  tileArray.forEach((tile) => {
+    tile[0].forEach((item) => {
+      console.log(item)
+      buffer.push(item.map((data) => {
+        return data * 1000000
+      }))
+    })
+  })
+  console.log(buffer)
+  return buffer
+}
 
 export const toSingleTile = (tileData) => {
   let buffer = []
   for (let squire of tileData) {
-    for(let point of squire[0]){
+    for (let point of squire[0]) {
       buffer.push(point)
     }
   }
@@ -218,8 +231,8 @@ export const toSingleTile = (tileData) => {
 
 function uniqBy(a, key) {
   var seen = {};
-  return a.filter(function(item) {
-      var k = key(item);
-      return seen.hasOwnProperty(k) ? false : (seen[k] = true);
+  return a.filter(function (item) {
+    var k = key(item);
+    return seen.hasOwnProperty(k) ? false : (seen[k] = true);
   })
 }

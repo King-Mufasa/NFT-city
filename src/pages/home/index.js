@@ -18,7 +18,7 @@ import { createMetaData, pinFileToIPFS } from '../../utils/pinata';
 import { CommonButton, PrimaryButton } from '../../components/button';
 import { areaStyle, layerStyle } from '../../utils/map-style';
 import { calculatePrice, filteredNFT, getAddress, getSpecLands, uploadNFT } from '../../utils/map-api';
-import { checkDouplicate, getKeyPoint, getLandArea, getSelectedArea, getTileArea, getTilePoint } from '../../utils/fasalib';
+import { checkDouplicate, getKeyPoint, getLandArea, getSelectedArea, getTileArea, getTilePoint, toUint } from '../../utils/fasalib';
 import "./homepage.scss"
 require('dotenv').config()
 
@@ -279,7 +279,6 @@ const HomePage = (props) => {
     const centerLng = (area.minLng + area.maxLng) / 2
     let zoom = 17
     const distance = Math.max((area.maxLat - area.minLat), (area.maxLng - area.minLng))
-    console.log(distance)
     if ((distance) > 0.001) {
       zoom = 15
     }
@@ -341,7 +340,7 @@ const HomePage = (props) => {
         })
         if (context.isOwner) {
           await context.cityContract.methods
-            .giveaway(uri.uri)
+            .giveaway(1, toUint(selectPath))
             .send({ from: context.walletAddress })
             .once('sending', function (payload) {
               update({
@@ -370,10 +369,11 @@ const HomePage = (props) => {
             })
         }
         else {
+          console.log("tile",toUint(selectPath))
           await context.cityContract.methods
-            .mint(1, selectPath)
+            .mint(1, toUint(selectPath))
             .send({ from: context.walletAddress, value: maticPrice})
-            .once('sending', function (payload) {
+            .on('sending', function (payload) {
               update({
                 eventCode: 'pending',
                 message: 'Transaction is sending',
@@ -563,7 +563,8 @@ const HomePage = (props) => {
       }
       const specPrice = await calculatePrice(getFilter(), selectPath)
       // console.log("unit cose", context.unitCost)
-      setLandPrice((context.unitCost * (selectPath.length - specPrice.count) + specPrice.price).toFixed(2))
+      // setLandPrice((context.unitCost * (selectPath.length - specPrice.count) + specPrice.price).toFixed(2))
+      setLandPrice(context.unitCost)
     }
     fetchData()
   }, [selectPath, context.unitCost, existingNFT])

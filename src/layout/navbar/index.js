@@ -75,7 +75,7 @@ const Navbar = (props) => {
               <SideMenuButton menu={menu} onClick={() => handleNavigate(menu.path)}  className="sm:hidden">
                 <FontAwesomeIcon icon={menu.icon} />
               </SideMenuButton>
-              <p className={`font-bold text-xl `}>{menu.label}</p>
+              <p className={`font-bold text-xl hidden sm:block`}>{menu.label}</p>
             </Link>
           ))}
           <div className="ml-20">

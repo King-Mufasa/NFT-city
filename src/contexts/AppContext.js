@@ -69,6 +69,7 @@ const AppContextProvider = ({ children }) => {
       const _web3 = await getWeb3()
       const _onBoard = await getOnBoard()
       const _chainId = await _web3.eth.getChainId()
+      console.log("chain",_chainId)
       const _address = await _web3.eth.getAccounts()
 
       setWeb3(_web3)
@@ -93,7 +94,7 @@ const AppContextProvider = ({ children }) => {
 
     const handleNetworkChange = (networkId) => {
       logout();
-      if (networkId !== '0x1') {
+      if (networkId !== '0x80001') {
         // displayNotify("warning", "You've just changed the Ethereum network! The app will not function properly if you selected the wrong network.")
       }
     }
@@ -145,7 +146,7 @@ const AppContextProvider = ({ children }) => {
   useEffect(() => {
     const fetchUnitCost = async () => {
       // const basePrice = await context.cityContract.methods._basePrice().call()
-      const basePrice = "16000000000000000"
+      const basePrice = "1600000000000000000"
       setUnitCost(web3.utils.fromWei(basePrice, 'ether'))
     }
     if (connected && cityContract && web3)
