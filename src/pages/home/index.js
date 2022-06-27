@@ -809,9 +809,6 @@ const HomePage = (props) => {
           <CommonButton onClick={() => setExpand(true)}>
             <FontAwesomeIcon size='1x' icon={faEye} />
           </CommonButton>
-          <CommonButton onClick={() => handleCross()}>
-            <FontAwesomeIcon size='1x' icon={faLocationCrosshairs} />
-          </CommonButton>
           <div className='flex gap-20 flex-col'>
             <FontAwesomeIcon icon={faMicrochip} size='1x' className='text-white mt-8' />
             <p className='text-white font-bold transform rotate-90 uppercase whitespace-nowrap text-xl'>Tiles selected :</p>
